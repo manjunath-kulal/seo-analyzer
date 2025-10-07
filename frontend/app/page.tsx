@@ -251,6 +251,120 @@ export default function Home() {
                 <li>• <strong>Final Score:</strong> Overall SEO quality rating</li>
               </ul>
             </div>
+
+            {/* Google SERP Preview - Moved here */}
+            {result && result.serp_preview && (
+              <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-4 sm:p-6 border-2 border-indigo-200">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4">
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-2">🔍</span>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Google SERP Preview
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs sm:text-sm font-semibold text-gray-600">CTR Score:</span>
+                      <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold ${
+                        result.serp_preview.ctr_score >= 80 ? 'bg-green-100 text-green-800' :
+                        result.serp_preview.ctr_score >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {result.serp_preview.ctr_score.toFixed(1)}/100
+                      </span>
+                    </div>
+                    <button
+                      onClick={copySerpSnippet}
+                      className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5"
+                    >
+                      {copied ? (
+                        <>
+                          <span>✓</span>
+                          <span>Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>📋</span>
+                          <span>Copy Snippet</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Google Search Result Mockup */}
+                <div className="bg-white rounded-lg p-4 sm:p-5 shadow-md mb-4 border border-gray-300">
+                  <div className="text-xs text-gray-600 mb-1 truncate">
+                    www.example.com › {result.serp_preview.url_slug}
+                  </div>
+                  <div 
+                    className="text-lg sm:text-xl text-blue-600 hover:underline cursor-pointer mb-1 font-medium break-words"
+                    dangerouslySetInnerHTML={{
+                      __html: result.top_keywords 
+                        ? highlightKeywords(result.serp_preview.meta_title, result.top_keywords)
+                        : result.serp_preview.meta_title
+                    }}
+                  />
+                  <div 
+                    className="text-sm text-gray-700 leading-relaxed break-words"
+                    dangerouslySetInnerHTML={{
+                      __html: result.top_keywords
+                        ? highlightKeywords(result.serp_preview.meta_description, result.top_keywords)
+                        : result.serp_preview.meta_description
+                    }}
+                  />
+                  <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mt-3 text-xs text-gray-500">
+                    <span>Title: {result.serp_preview.title_length} chars</span>
+                    <span className="hidden sm:inline">•</span>
+                    <span>Description: {result.serp_preview.description_length} chars</span>
+                  </div>
+                </div>
+
+                {/* Optimization Issues */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Title Issues */}
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-2 flex items-center">
+                      <span className="mr-2">📝</span>
+                      Title Optimization
+                    </h4>
+                    <div className="space-y-2">
+                      {result.serp_preview.title_issues.map((issue, index) => (
+                        <div key={index} className="text-xs text-gray-700 flex items-start gap-2">
+                          <span className="flex-shrink-0">{issue.startsWith('✅') ? '✅' : issue.startsWith('⚠️') ? '⚠️' : '💡'}</span>
+                          <span className="flex-1 break-words">{issue.replace(/^[✅⚠️💡]\s*/, '')}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Description Issues */}
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-2 flex items-center">
+                      <span className="mr-2">📄</span>
+                      Description Optimization
+                    </h4>
+                    <div className="space-y-2">
+                      {result.serp_preview.description_issues.map((issue, index) => (
+                        <div key={index} className="text-xs text-gray-700 flex items-start gap-2">
+                          <span className="flex-shrink-0">{issue.startsWith('✅') ? '✅' : issue.startsWith('⚠️') ? '⚠️' : '💡'}</span>
+                          <span className="flex-1 break-words">{issue.replace(/^[✅⚠️💡]\s*/, '')}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* CTR Explanation */}
+                <div className="mt-4 p-3 bg-indigo-100 rounded-lg">
+                  <p className="text-xs sm:text-sm text-indigo-900">
+                    <strong>CTR Score</strong> predicts how likely users are to click your result in Google search.
+                    Higher scores mean better optimization for title length, power words, numbers, and calls-to-action.
+                    <span className="block mt-1 text-indigo-700">Keywords highlighted in yellow are your top 3.</span>
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Results Section */}
@@ -351,120 +465,6 @@ export default function Home() {
                           <p className="text-gray-700 text-sm flex-1">{suggestion}</p>
                         </div>
                       ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Google SERP Preview */}
-                {result.serp_preview && (
-                  <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-4 sm:p-6 border-2 border-indigo-200">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4">
-                      <div className="flex items-center">
-                        <span className="text-2xl mr-2">🔍</span>
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          Google SERP Preview
-                        </h3>
-                      </div>
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-xs sm:text-sm font-semibold text-gray-600">CTR Score:</span>
-                          <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold ${
-                            result.serp_preview.ctr_score >= 80 ? 'bg-green-100 text-green-800' :
-                            result.serp_preview.ctr_score >= 60 ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                            {result.serp_preview.ctr_score.toFixed(1)}/100
-                          </span>
-                        </div>
-                        <button
-                          onClick={copySerpSnippet}
-                          className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5"
-                        >
-                          {copied ? (
-                            <>
-                              <span>✓</span>
-                              <span>Copied!</span>
-                            </>
-                          ) : (
-                            <>
-                              <span>📋</span>
-                              <span>Copy Snippet</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Google Search Result Mockup */}
-                    <div className="bg-white rounded-lg p-4 sm:p-5 shadow-md mb-4 border border-gray-300">
-                      <div className="text-xs text-gray-600 mb-1 truncate">
-                        www.example.com › {result.serp_preview.url_slug}
-                      </div>
-                      <div 
-                        className="text-lg sm:text-xl text-blue-600 hover:underline cursor-pointer mb-1 font-medium break-words"
-                        dangerouslySetInnerHTML={{
-                          __html: result.top_keywords 
-                            ? highlightKeywords(result.serp_preview.meta_title, result.top_keywords)
-                            : result.serp_preview.meta_title
-                        }}
-                      />
-                      <div 
-                        className="text-sm text-gray-700 leading-relaxed break-words"
-                        dangerouslySetInnerHTML={{
-                          __html: result.top_keywords
-                            ? highlightKeywords(result.serp_preview.meta_description, result.top_keywords)
-                            : result.serp_preview.meta_description
-                        }}
-                      />
-                      <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mt-3 text-xs text-gray-500">
-                        <span>Title: {result.serp_preview.title_length} chars</span>
-                        <span className="hidden sm:inline">•</span>
-                        <span>Description: {result.serp_preview.description_length} chars</span>
-                      </div>
-                    </div>
-
-                    {/* Optimization Issues */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Title Issues */}
-                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                        <h4 className="text-sm font-semibold text-gray-900 mb-2 flex items-center">
-                          <span className="mr-2">📝</span>
-                          Title Optimization
-                        </h4>
-                        <div className="space-y-2">
-                          {result.serp_preview.title_issues.map((issue, index) => (
-                            <div key={index} className="text-xs text-gray-700 flex items-start gap-2">
-                              <span className="flex-shrink-0">{issue.startsWith('✅') ? '✅' : issue.startsWith('⚠️') ? '⚠️' : '💡'}</span>
-                              <span className="flex-1 break-words">{issue.replace(/^[✅⚠️💡]\s*/, '')}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Description Issues */}
-                      <div className="bg-white rounded-lg p-4 shadow-sm">
-                        <h4 className="text-sm font-semibold text-gray-900 mb-2 flex items-center">
-                          <span className="mr-2">📄</span>
-                          Description Optimization
-                        </h4>
-                        <div className="space-y-2">
-                          {result.serp_preview.description_issues.map((issue, index) => (
-                            <div key={index} className="text-xs text-gray-700 flex items-start gap-2">
-                              <span className="flex-shrink-0">{issue.startsWith('✅') ? '✅' : issue.startsWith('⚠️') ? '⚠️' : '💡'}</span>
-                              <span className="flex-1 break-words">{issue.replace(/^[✅⚠️💡]\s*/, '')}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* CTR Explanation */}
-                    <div className="mt-4 p-3 bg-indigo-100 rounded-lg">
-                      <p className="text-xs sm:text-sm text-indigo-900">
-                        <strong>CTR Score</strong> predicts how likely users are to click your result in Google search.
-                        Higher scores mean better optimization for title length, power words, numbers, and calls-to-action.
-                        <span className="block mt-1 text-indigo-700">Keywords highlighted in yellow are your top 3.</span>
-                      </p>
                     </div>
                   </div>
                 )}
