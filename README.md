@@ -6,6 +6,11 @@ This project adds a Google SERP preview and CTR scoring module, filling a gap in
 
 ⸻
 
+
+<p align="center">
+  <img src="https://github.com/manjunath-kulal/seo-analyzer/blob/main/Writesonic%20SEO%20Analyzer.png?raw=true" alt="Writesonic SEO Analyzer" width="800"/>
+</p>
+
 🚀 Core Features
 
 ✅ Readability Scoring — Rates content complexity using Flesch Reading Ease.
