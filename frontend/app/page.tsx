@@ -4,7 +4,8 @@ import { useState } from 'react';
 import axios from 'axios';
 
 // API endpoint for the backend
-const API_URL = 'http://localhost:8000/analyze';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const ANALYZE_ENDPOINT = `${API_URL}/analyze`;
 
 // Sample text for demo
 const SAMPLE_TEXT = `Content marketing has become essential for modern digital strategies. Quality content helps improve search engine rankings and attracts organic traffic to your website. SEO best practices include thorough keyword research, on-page optimization, and creating engaging content that provides real value to readers. Regular content updates and proper formatting with headings and paragraphs improve readability and user experience. Link building and social media promotion also contribute to better online visibility and brand awareness.`;
@@ -112,10 +113,10 @@ export default function Home() {
     setResult(null);
 
     try {
-      console.log('Sending request to:', API_URL);
+      console.log('Sending request to:', ANALYZE_ENDPOINT);
       console.log('Text length:', text.length);
 
-      const response = await axios.post(API_URL, { text });
+      const response = await axios.post(ANALYZE_ENDPOINT, { text });
       
       console.log('Response received:', response.data);
       setResult(response.data);
