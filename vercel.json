@@ -4,22 +4,30 @@
     {
       "src": "frontend/package.json",
       "use": "@vercel/next"
+    },
+    {
+      "src": "api/*.py",
+      "use": "@vercel/python"
     }
   ],
+  "functions": {
+    "api/analyze.py": {
+      "runtime": "python3.9"
+    }
+  },
+  "build": {
+    "env": {
+      "PYTHONPATH": "/var/task"
+    }
+  },
   "routes": [
     {
-      "src": "/frontend/(.*)",
-      "dest": "/frontend/$1"
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
     },
     {
       "src": "/(.*)",
       "dest": "/frontend/$1"
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "http://localhost:8000/:path*"
     }
   ]
 }
