@@ -1,2 +1,3 @@
 textstat==0.7.3
 nltk==3.8.1
+# Note: leave as-is for full analyzer; add additional packages here if needed for serverless functions
