@@ -3,7 +3,9 @@
 import { useState } from 'react';
 
 // Use Vercel backend for all API calls
-const API_URL = 'https://backend-sand-three-11.vercel.app/analyze';
+const API_URL = process.env.NEXT_PUBLIC_API_URL
+  ? `${process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '')}/analyze`
+  : 'https://backend-sand-three-11.vercel.app/analyze';
 
 // Sample text for demo
 const SAMPLE_TEXT = `Content marketing has become essential for modern digital strategies. Quality content helps improve search engine rankings and attracts organic traffic to your website. SEO best practices include thorough keyword research, on-page optimization, and creating engaging content that provides real value to readers. Regular content updates and proper formatting with headings and paragraphs improve readability and user experience. Link building and social media promotion also contribute to better online visibility and brand awareness.`;
