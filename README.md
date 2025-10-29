@@ -1,104 +1,142 @@
-🧠 Writesonic SEO Analyzer — Enhanced with SERP Simulation
+🧠 **Writesonic SEO Analyzer** — FastAPI + Next.js
 
-A FastAPI + Next.js SEO analyzer built to enhance Writesonic’s AI content optimization suite.
+This project provides instant SEO analysis, Google SERP preview, and actionable AI-powered suggestions for your content. Built with FastAPI (Python) and Next.js (TypeScript), it’s ready for local development and Vercel deployment.
 
-This project adds a Google SERP preview and CTR scoring module, filling a gap in Writesonic’s current SEO workflow and giving content creators actionable insights instantly.
+---
 
-⸻
+## 🚀 Features
 
+- **Readability Scoring** (Flesch Reading Ease)
+- **Keyword Analysis** (top keywords, density)
+- **Plagiarism Detection** (N-gram, sentence similarity)
+- **Google SERP Simulation** (meta title, description, URL slug, CTR prediction)
+- **AI-Powered Suggestions**
+- **Final SEO Score (0–100)**
+- **Interactive API Docs** (`/docs`)
 
-<p align="center">
-  <img src="https://github.com/manjunath-kulal/seo-analyzer/blob/main/Writesonic%20SEO%20Analyzer.png?raw=true" alt="Writesonic SEO Analyzer" width="800"/>
-</p>
+---
 
-##🚀 Core Features
+## 🧩 Tech Stack
+
+- **Backend:** Python 3.10+, FastAPI, NLTK, TextStat
+- **Frontend:** Next.js 14, TypeScript, Tailwind CSS
+
+---
+
+## 🏗️ Architecture
 
 ```
+┌─────────────────────────────┐
+│        VERCEL CLOUD         │
+│                             │
+│ ┌─────────────┐ ┌──────────┐│
+│ │  Backend    │ │ Frontend ││
+│ │  FastAPI    │ │ Next.js  ││
+│ │  /analyze   │ │ Uses     ││
+│ │  /docs      │ │ NEXT_PUBLIC_API_URL │
+│ └─────────────┘ └──────────┘│
+└─────────────────────────────┘
+```
 
-✅ Readability Scoring — Rates content complexity using Flesch Reading Ease.
-✅ Keyword Analysis — Extracts top keywords and computes density.
-✅ Plagiarism Detection — N-gram and sentence similarity checks.
-✅ 🔹 Google SERP Simulation (Main Highlight) — Generates meta title, meta description, URL slug, and predicts CTR for SEO optimization.
-✅ AI-Powered Suggestions — Recommendations to improve SEO and readability.
-✅ Final SEO Score (0–100) — Combines all metrics for a quick content performance snapshot.
-✅ Interactive API Documentation — Ready-to-use Swagger UI at /docs.
+---
 
-⸻
+## ⚡ Quick Start (Local)
 
-🧩 Tech Stack
-
-Backend: Python 3.10+, FastAPI, NLTK, TextStat, Uvicorn
-Frontend: Next.js 14, TypeScript, Tailwind CSS, Axios
-
-Design Principles Inspired by Writesonic:
-	•	Async-first, clean and intuitive UI
-	•	Data-driven metrics and actionable insights
-	•	Full-stack architecture demonstrating ownership
-
-⸻
-
-🎯 Why I Built This
-
-This project demonstrates:
-	•	Founder-like Thinking — Identified a missing SERP feature and implemented it end-to-end.
-	•	Ownership & Initiative — Complete full-stack development, testing, and deployment.
-	•	Customer Obsession — Provides writers instant, actionable feedback on their content.
-	•	AI Enthusiasm & Innovation — Integrated NLP algorithms to calculate SEO metrics and predict CTR.
-	•	Data-Driven Decision Making — Combines readability, keywords, plagiarism, and SERP scoring into a single, actionable report.
-
-⸻
-
-## 🚀 Deployment on Vercel
-
-This project is designed to deploy as **two separate Vercel projects**:
-
-### Quick Deploy
-
+**Backend**
 ```bash
-# Option 1: Use the automated script
-./deploy-vercel.sh
-
-# Option 2: Manual deployment (see DEPLOYMENT.md for details)
-cd backend && vercel --prod
-cd ../frontend && vercel --prod
-```
-
-### Architecture
-
-- **Backend**: `seo-analyzer-backend` (FastAPI on Vercel)
-- **Frontend**: `seo-analyzer-frontend` (Next.js on Vercel)
-- **Environment Variable**: `NEXT_PUBLIC_API_URL` links frontend to backend
-
-📖 **[Full Deployment Guide →](./DEPLOYMENT.md)**
-
-⸻
-
-🧑‍💻 Quick Start
-
-Backend
-
 cd backend
 python3 -m venv venv
-source venv/bin/activate       # Windows: venv\Scripts\activate
+source venv/bin/activate
 pip install -r requirements.txt
 python download_nltk_data.py
 uvicorn main:app --reload
+# Docs: http://localhost:8000/docs
+```
 
-API Docs: http://localhost:8000/docs
-
-Frontend
-
+**Frontend**
+```bash
 cd frontend
 npm install
 npm run dev
+# App: http://localhost:3000
+```
 
-App: http://localhost:3000
+---
 
-Quick Start (Both Servers)
+## 🚀 Vercel Deployment (Production)
 
-./start-all.sh
+Deploy as **two separate Vercel projects**:
 
+### 1. Deploy Backend
+```bash
+cd backend
+vercel login
+vercel --prod
+# Copy backend URL (e.g. https://seo-analyzer-backend.vercel.app)
+```
 
+### 2. Set Frontend Environment Variable
+- Go to Vercel Dashboard → Frontend Project → Settings → Environment Variables
+- Add:
+  - Name: `NEXT_PUBLIC_API_URL`
+  - Value: `https://seo-analyzer-backend.vercel.app` (your backend URL)
+  - Environments: Production, Preview, Development
+
+### 3. Deploy Frontend
+```bash
+cd frontend
+vercel --prod
+# Visit your frontend URL
+```
+
+---
+
+## 🔐 Environment Variables
+
+**Frontend:**
+- `NEXT_PUBLIC_API_URL` — Backend API endpoint
+  - Local: `http://localhost:8000`
+  - Production: `https://your-backend.vercel.app`
+
+**Backend:**
+- No environment variables needed (CORS configured in `main.py`)
+
+---
+
+## 🛠️ Troubleshooting
+
+- **API 404 Error:** Make sure your frontend is calling the correct backend endpoint (e.g. `/analyze`, not `/api/analyze`).
+- **CORS Issues:** Ensure your backend CORS origins include your frontend URL.
+- **Missing NEXT_PUBLIC_ Prefix:** Always use `NEXT_PUBLIC_API_URL` for frontend API URL.
+- **Build Errors:** Run `npm run build` before `npm start` for production.
+
+---
+
+## 📦 Project Structure
+
+```
+api/         # Python microservices (optional)
+backend/     # FastAPI backend
+frontend/    # Next.js frontend
+README.md    # This file
+DEPLOYMENT.md, ARCHITECTURE.md, etc. # (merged here)
+```
+
+---
+
+## 🧑‍💻 Ownership & Innovation
+
+- Founder-like thinking: Identified and built missing SERP feature end-to-end
+- Full-stack development, testing, and deployment
+- Customer obsession: Instant, actionable feedback for writers
+- AI/NLP integration: SEO metrics, CTR prediction
+- Data-driven: Combines all metrics into a single report
+
+---
+
+## 📝 Changelog & Docs
+
+All deployment, architecture, and environment info is now in this README. For scripts and advanced troubleshooting, see project files.
 ⸻
 
 📊 API Example

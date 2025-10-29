@@ -5,6 +5,35 @@ This API analyzes text content for SEO metrics including readability,
 keyword density, plagiarism detection, and generates an overall score.
 """
 
+import os
+from pathlib import Path
+
+# Set environment variables for Vercel serverless (read-only filesystem workaround)
+# CRITICAL: Must be set BEFORE importing textstat or any other libraries that might write to home
+os.environ['HOME'] = '/tmp'
+os.environ['TMPDIR'] = '/tmp'
+os.environ['TEMP'] = '/tmp'
+os.environ['TMP'] = '/tmp'
+BASE_DIR = Path(__file__).resolve().parent
+LOCAL_NLTK_DIR = BASE_DIR / 'nltk_data'
+TMP_NLTK_DIR = Path('/tmp/nltk_data')
+
+# Respect packaged corpora first, then fallback to /tmp for runtime downloads
+local_nltk_path = str(LOCAL_NLTK_DIR) if LOCAL_NLTK_DIR.exists() else ''
+tmp_nltk_path = str(TMP_NLTK_DIR)
+os.environ['NLTK_DATA'] = os.pathsep.join(
+    [path for path in [local_nltk_path, tmp_nltk_path] if path]
+)
+os.environ['MPLCONFIGDIR'] = '/tmp'
+os.environ['XDG_CACHE_HOME'] = '/tmp/.cache'
+os.environ['TRANSFORMERS_CACHE'] = '/tmp'
+os.environ['HF_HOME'] = '/tmp'
+
+# Create cache directories
+os.makedirs('/tmp/.cache', exist_ok=True)
+TMP_NLTK_DIR.mkdir(parents=True, exist_ok=True)
+
+# Now import other modules AFTER environment is set
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -17,6 +46,13 @@ import nltk
 from difflib import SequenceMatcher
 import uvicorn
 
+nltk_paths = []
+if LOCAL_NLTK_DIR.exists():
+    nltk_paths.append(str(LOCAL_NLTK_DIR))
+nltk_paths.append(str(TMP_NLTK_DIR))
+nltk_paths.extend([path for path in nltk.data.path if path not in nltk_paths])
+nltk.data.path = nltk_paths
+
 # Initialize FastAPI app
 app = FastAPI(
     title="Writesonic SEO Analyzer",
@@ -24,14 +60,39 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Download NLTK data on startup when not bundled
+@app.on_event("startup")
+async def startup_event():
+    """Ensure essential NLTK resources are available before serving requests."""
+
+    required_resources = [
+        ("corpora/stopwords", "stopwords"),
+        ("tokenizers/punkt", "punkt"),
+    ]
+
+    for resource, package in required_resources:
+        try:
+            nltk.data.find(resource)
+            print(f"NLTK resource '{resource}' already available")
+        except LookupError:
+            try:
+                print(f"Attempting to download '{package}' to {TMP_NLTK_DIR}...")
+                nltk.download(package, download_dir=str(TMP_NLTK_DIR), quiet=True)
+                nltk.data.find(resource)
+                print(f"Successfully downloaded '{package}' to {TMP_NLTK_DIR}")
+            except Exception as exc:  # pragma: no cover - diagnostics only
+                print(f"Warning: unable to obtain NLTK resource '{resource}': {exc}")
+
 # Add CORS middleware to allow frontend requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "http://localhost:4000",
+        "http://127.0.0.1:4000",
+        "https://frontend-pbae14cju-manjunath-kulals-projects.vercel.app",  # Your actual frontend URL
         "https://*.vercel.app",  # Allow all Vercel deployments
-        "https://seo-analyzer-frontend.vercel.app",  # Your frontend production URL
     ],
     allow_credentials=True,
     allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
@@ -111,10 +172,20 @@ def get_stopwords() -> set:
     try:
         stopwords_set = set(nltk.corpus.stopwords.words('english'))
     except LookupError:
-        # Download stopwords if not available
-        print("Downloading NLTK stopwords...")
-        nltk.download('stopwords', quiet=True)
-        stopwords_set = set(nltk.corpus.stopwords.words('english'))
+        # Fallback: use a bundled minimal stopwords list to avoid runtime downloads
+        print("NLTK stopwords not found; using bundled fallback stopwords list")
+        fallback_stopwords = {
+            'a','about','above','after','again','against','all','am','an','and','any','are','as','at',
+            'be','because','been','before','being','below','between','both','but','by','could','did',
+            'do','does','doing','down','during','each','few','for','from','further','had','has','have',
+            'having','he','her','here','hers','herself','him','himself','his','how','i','if','in','into',
+            'is','it','its','itself','me','more','most','my','myself','no','nor','not','of','off','on','once',
+            'only','or','other','our','ours','ourselves','out','over','own','same','she','should','so','some',
+            'such','than','that','the','their','theirs','them','themselves','then','there','these','they','this',
+            'those','through','to','too','under','until','up','very','was','we','were','what','when','where','which',
+            'while','who','whom','why','with','would','you','your','yours','yourself','yourselves'
+        }
+        stopwords_set = fallback_stopwords
     
     _stopwords_cache = stopwords_set
     return stopwords_set

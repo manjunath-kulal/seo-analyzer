@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import axios from 'axios';
 
-// API endpoint for the backend - uses environment variable for production
-const API_URL = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/analyze`;
+// Use Vercel backend for all API calls
+const API_URL = 'https://backend-sand-three-11.vercel.app/analyze';
 
 // Sample text for demo
 const SAMPLE_TEXT = `Content marketing has become essential for modern digital strategies. Quality content helps improve search engine rankings and attracts organic traffic to your website. SEO best practices include thorough keyword research, on-page optimization, and creating engaging content that provides real value to readers. Regular content updates and proper formatting with headings and paragraphs improve readability and user experience. Link building and social media promotion also contribute to better online visibility and brand awareness.`;
@@ -115,19 +114,44 @@ export default function Home() {
       console.log('Sending request to:', API_URL);
       console.log('Text length:', text.length);
 
-      const response = await axios.post(API_URL, { text });
-      
-      console.log('Response received:', response.data);
-      setResult(response.data);
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text }),
+      });
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('Response received:', data);
+      setResult(data);
     } catch (err: any) {
       console.error('Error during analysis:', err);
+      console.error('Error details:', {
+        code: err.code,
+        message: err.message,
+        response: err.response?.data
+      });
       
-      if (err.code === 'ERR_NETWORK') {
-        setError('Unable to connect to the backend. Make sure the API server is running on http://localhost:8000');
+      if (err.code === 'ERR_NETWORK' || err.code === 'ECONNREFUSED') {
+  setError(`Unable to connect to the backend API. The server may be down or experiencing issues.`);
       } else if (err.response) {
-        setError(err.response.data?.detail || 'An error occurred during analysis');
+        const status = err.response.status;
+        const detail = err.response.data?.detail || err.response.data?.message;
+        
+        if (status === 500) {
+          setError(`Backend server error (500): ${detail || 'Internal server error occurred'}`);
+        } else if (status === 404) {
+          setError(`API endpoint not found (404). Please check the backend deployment.`);
+        } else if (status === 403 || status === 401) {
+          setError(`Authentication required (${status}). Please check deployment settings.`);
+        } else {
+          setError(detail || `An error occurred during analysis (Status: ${status})`);
+        }
       } else {
-        setError('An unexpected error occurred');
+        setError(`An unexpected error occurred: ${err.message || 'Unknown error'}`);
       }
     } finally {
       setLoading(false);
