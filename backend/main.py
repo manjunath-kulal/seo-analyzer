@@ -91,7 +91,7 @@ app.add_middleware(
         "http://127.0.0.1:3000",
         "http://localhost:4000",
         "http://127.0.0.1:4000",
-        "https://frontend-cpfr19apd-manjunath-kulals-projects.vercel.app",  # Your actual frontend URL
+        "https://frontend-kappa-inky-92.vercel.app",  # Your actual frontend URL
         "https://*.vercel.app",  # Allow all Vercel deployments
     ],
     allow_credentials=True,
