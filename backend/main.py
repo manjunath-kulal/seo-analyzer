@@ -90,11 +90,9 @@ app.add_middleware(
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:4000",
-        "https://frontend-kappa-inky-92.vercel.app",
-        "https://frontend-2ceydx4l7-manjunath-kulals-projects.vercel.app",
-        "https://frontend-cpfr19apd-manjunath-kulals-projects.vercel.app",
-        "https://frontend-fovy6f1m9-manjunath-kulals-projects.vercel.app",
-        "https://*.vercel.app",
+        "http://127.0.0.1:4000",
+        "https://frontend-kappa-inky-92.vercel.app",  # Your actual frontend URL
+        "https://*.vercel.app",  # Allow all Vercel deployments
     ],
     allow_credentials=True,
     allow_methods=["*"],  # Allow all methods (GET, POST, etc.)

@@ -44,3 +44,4 @@ backend-server.log
 frontend-server.log
 backend.log
 frontend.log
+.vercel
